@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App", "App.csproj", "{D58ABFE4-060D-45B5-A4A7-4B59048CEC31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "..\UnitTests\UnitTests.csproj", "{492DB9B3-4A4E-4C84-8456-B4E1532298F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{492DB9B3-4A4E-4C84-8456-B4E1532298F3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D58ABFE4-060D-45B5-A4A7-4B59048CEC31} = {D58ABFE4-060D-45B5-A4A7-4B59048CEC31}
 	EndProjectSection

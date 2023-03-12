@@ -25,3 +25,4 @@ out/
 ## Visual Studio
 ##############################
 .vs
+/Test.sln.DotSettings.user
