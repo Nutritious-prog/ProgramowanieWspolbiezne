@@ -36,7 +36,7 @@ namespace Data
         //jeśli tak generuje nowy cel
         private bool checkIfReachedDestination()
         {
-            if(_currentCoordinates.X)
+            return true;
         }
     }
 }
