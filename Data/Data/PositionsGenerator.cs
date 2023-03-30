@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 
 
-namespace Logic
+namespace Data
 {
     public class PositionsGenerator
     {

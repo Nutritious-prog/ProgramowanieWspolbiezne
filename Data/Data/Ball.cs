@@ -1,9 +1,8 @@
 ﻿using System.Numerics;
-using Logic;
 
 namespace Data
 {
-    internal class Ball
+    public class Ball
     {
         //aktualna pozycja kulki aktualizowana w każdym odświeżeniu
         Vector2 _currentCoordinates = new Vector2();
