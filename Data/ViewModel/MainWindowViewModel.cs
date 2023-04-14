@@ -16,18 +16,18 @@ namespace ViewModel
     {
 
 
-        private BallManager _ballManager;
+        private LogicAPI _logicAPI;
 
         public ICommand Apply { get; set; }
         public ICommand Start { get; set; }
-        public ObservableCollection<Ball> ObsCollBall => _ballManager.getBalls();
+        public ObservableCollection<Ball> ObsCollBall => _logicAPI.getBalls();
 
         public MainWindowViewModel()
         {
 
-            _ballManager = new BallManager();
-            Apply = new RelayCommand(() => _ballManager.CreateBalls(NrOfBalls));
-            Start = new RelayCommand(() => _ballManager.RunBalls());
+            _logicAPI = LogicAPI.CreateAPI();
+            Apply = new RelayCommand(() => _logicAPI.CreateBalls(NrOfBalls));
+            Start = new RelayCommand(() => _logicAPI.RunBalls());
         }
 
 

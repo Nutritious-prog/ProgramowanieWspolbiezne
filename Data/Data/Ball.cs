@@ -14,7 +14,7 @@ namespace Data
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         private object _lockObject = new object();
-
+        private bool _canMove = true;
         private double _xCoordinate;
         private double _yCoordinate;
         public double XCoordinate
@@ -43,9 +43,11 @@ namespace Data
         }
 
         //ilość pikseli którą kulka będzie przebywać w każdym odświeżeniu
-        public double _speed { get; set; }
+        public double NrOfFrames { get; set; }
+        public double Speed { get; set; }
 
-        public int _radius { get; set; }
+        public int Diameter { get; private set; }
+        public int Radius => Diameter / 2;
 
         private double _destinationPlaneX;
         public double DestinationPlaneX
@@ -54,9 +56,9 @@ namespace Data
 
             set
             {
-                if (value > 640 - _radius * 2)
+                if (value > 640 - Diameter)
                 {
-                    _destinationPlaneX = 640 - _radius * 2;
+                    _destinationPlaneX = 640 - Diameter;
                 }
                 else _destinationPlaneX = value;
             }
@@ -68,9 +70,9 @@ namespace Data
 
             set
             {
-                if (value > 360 - _radius * 2)
+                if (value > 360 - Diameter)
                 {
-                    _destinationPlaneY = 360 - _radius * 2;
+                    _destinationPlaneY = 360 - Diameter;
                 }
                 else _destinationPlaneY = value;
             }
@@ -79,39 +81,39 @@ namespace Data
         public double _mass { get; set; }
         public PointF _vector { get; set; }
 
-        public Ball(double XCoordinate, double YCoordinate, double Speed, int Radius, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector)
+        public Ball(double XCoordinate, double YCoordinate, double NrOfFrames, int Diameter, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector)
         {
-            this._radius = Radius;
+            this.Diameter = Diameter;
             this.XCoordinate = XCoordinate;
             this.YCoordinate = YCoordinate;
-            this._speed = Speed;
+            this.NrOfFrames = NrOfFrames;
             this.DestinationPlaneX = DestinationPlaneX;
             this.DestinationPlaneY = DestinationPlaneY;
             this._mass = Mass;
             this._vector = Vector;
         }
 
-        public void Move(double nrOfFrames, double duration)
+        public void Move()
         {
-            if ((_vector.X > 0 && XCoordinate + _vector.X > DestinationPlaneX)
-                || (_vector.X < 0 && XCoordinate + _vector.X < DestinationPlaneX))
-                XCoordinate = DestinationPlaneX;
-            else
-                XCoordinate += _vector.X;
+            if (!_canMove) return;
 
-            if ((_vector.Y > 0 && YCoordinate + _vector.Y > DestinationPlaneY)
-                || (_vector.Y < 0 && YCoordinate + _vector.Y < DestinationPlaneY))
-                YCoordinate = DestinationPlaneY;
+            if (_vector.X > 0 && XCoordinate + _vector.X > 640 - Diameter)
+                XCoordinate = 640 - Diameter;
+            else if (_vector.X < 0 && XCoordinate + _vector.X < 0)
+                XCoordinate = 0;
+            else
+                XCoordinate += _vector.X;   
+
+            if (_vector.Y > 0 && YCoordinate + _vector.Y > 360 - Diameter)
+                YCoordinate = 360 - Diameter;
+            else if (_vector.Y < 0 && YCoordinate + _vector.Y < 0)
+                YCoordinate = 0;
             else
                 YCoordinate += _vector.Y;
-
-            _speed = (int)(duration / nrOfFrames * 100);
         }
         public void UpdateMovement(double x, double y, PointF vector, double speed)
         {
-            //var previousDestX = DestinationPlaneX;
-            //var previousDestY = DestinationPlaneY;
-            //var previousVector = Vector;
+            _canMove = false;
 
             // sekcja krytyczna - tylko 1 watek na raz moze wykonac te logike
             lock (_lockObject)
@@ -119,11 +121,9 @@ namespace Data
                 DestinationPlaneX = x;
                 DestinationPlaneY = y;
                 _vector = vector;
-                _speed = speed;
-                //Console.WriteLine($"MOVEMENT UPDATED for Ball with id {Id}:\n" +
-                //$"destination X,Y: {previousDestX}, {previousDestY} => {DestinationPlaneX}, {DestinationPlaneY}\n" +
-                //$"Vector X,Y: {previousVector.X}, {previousVector.Y} => {vector.X}, {vector.Y}\n");
+                Speed = speed;
             }
+            _canMove = true;    
         }
     }
 }
