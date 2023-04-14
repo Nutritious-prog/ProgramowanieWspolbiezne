@@ -70,7 +70,7 @@
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Ellipse Fill="#823665" Width="{Binding Radius}" Height="{Binding Radius}"/>
+                            <Ellipse Fill="#823665" Width="{Binding Diameter}" Height="{Binding Diameter}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemsPanel>
@@ -81,5 +81,5 @@
                 </ItemsControl>
             </Viewbox>
         </Border>
-    </Grid>
+    </Grid> 
 </Window>

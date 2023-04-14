@@ -43,9 +43,9 @@ namespace Data
         }
 
         //ilość pikseli którą kulka będzie przebywać w każdym odświeżeniu
-        private double _speed { get; set; }
+        public double _speed { get; set; }
 
-        private int _radius { get; set; }
+        public int _radius { get; set; }
 
         private double _destinationPlaneX;
         public double DestinationPlaneX
