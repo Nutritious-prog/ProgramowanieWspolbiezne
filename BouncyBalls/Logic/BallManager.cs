@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Drawing;
 using Data;
 
@@ -22,6 +23,7 @@ namespace Logic
         public override void CreateBalls(int NrOfBalls)
         {
             _currentBalls.Clear();
+            StopBalls();
             Random random = new Random();
             for (int i = 0; i < NrOfBalls; i++)
             {
@@ -30,7 +32,7 @@ namespace Logic
                 Ball ball = new Ball(
                     random.Next(0, 640 - diameter),
                     random.Next(2, 360 - diameter),
-                    random.Next(20, 30), diameter,
+                    random.Next(120, 144), diameter,
                     0,
                     0,
                     random.NextDouble() + 0.1,
@@ -44,12 +46,12 @@ namespace Logic
         {
             ball.Move();
 
-            Thread.Sleep(50);
+            Thread.Sleep(5);
         }
 
-        public override void BounceBall(Ball ball1, Ball ball2)  // TODO: odbijanie pilki od sciany
+        public override void BounceBall(Ball ball1, Ball ball2)  // funkcja reaguje na odbicie piłki od innej piłki
         {
-            PointF tmp = ball1._vector;  // czy ten wektor jest gdziekolwiek uzywany? chyba nie
+            PointF tmp = ball1._vector; 
 
             double tmpX = ball1.DestinationPlaneX;
             double tmpY = ball1.DestinationPlaneY;
@@ -62,7 +64,7 @@ namespace Logic
             ball2.UpdateMovement(tmpX, tmpY, tmp, temp2);
         }
 
-        public override /*async*/ void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls) // czy pilka zderza sie z inna pilka
+        public override /*async*/ void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken cancellationToken) // czy pilka zderza sie z inna pilka
         {
             double distanceX;
             double distanceY;
@@ -77,7 +79,7 @@ namespace Logic
                 }
             }
 
-            while (true) // wykrywamy zderzenia przez caly czas dzialania programu
+            while (true && !cancellationToken.IsCancellationRequested) // wykrywamy zderzenia przez caly czas dzialania programu, aż do odwołania
             {
                 for (int i = 0; i < CurrentBalls.Count; i++)
                 {
@@ -90,14 +92,24 @@ namespace Logic
                             // jezeli obsluzylismy juz odbicie dla tej pary kulek, to pomijamy Bounce
                             if (bouncesDict[(i, j)]) continue;
 
-                            //Console.WriteLine($"COLLISION DETECTED between:\n{CurrentBalls[i].Details}\nand\n\n{CurrentBalls[j].Details}\n");
+                            Debug.WriteLine($"COLLISION DETECTED between ball:{i} and {j}");
                             BounceBall(CurrentBalls[i], CurrentBalls[j]);
                             bouncesDict[(i, j)] = true; // jezeli zrobilismy Bounce, to ustawiamy flage na true, zeby wiedziec, ze to odbicie juz zostalo obsluzone
                         }
                         else bouncesDict[(i, j)] = false; // jezeli kulki sie nie stykaja to ustawiamy flage na false, zeby bylo mozna obsluzyc kolejne zderzenie dla tej pary kulek
+                      
                     }
                 }
+                int index = 0;
+                foreach (bool value in bouncesDict.Values)
+                {
+                    if(value == true) Debug.WriteLine($"Dictionary value[{index}]: " + value);
+
+                    index++;
+                }
+                Thread.Sleep(5); // krótkie odczekanie, aby jednorazowo wykrywać moment zderzenia
             }
+            
         }
 
         public override void FindNewBallPosition(Ball ball)
@@ -179,46 +191,62 @@ namespace Logic
             }
         }
 
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        public void BallTaskMethod(Ball ball, CancellationToken cancellationToken)
+        {
+
+            bool hitWall = false;
+            FindNewBallPosition(ball);
+            while (true && !cancellationToken.IsCancellationRequested)
+            {
+
+                if (!hitWall && (ball.XCoordinate <= 0 || ball.XCoordinate >= 640 - ball.Diameter))
+                {
+                    hitWall = true;
+                    ball._vector = new PointF
+                    {
+                        X = -ball._vector.X,
+                        Y = ball._vector.Y
+                    };
+                }
+
+                if (!hitWall && (ball.YCoordinate <= 0 || ball.YCoordinate >= 360 - ball.Diameter))
+                {
+                    hitWall = true;
+                    ball._vector = new PointF
+                    {
+                        X = ball._vector.X,
+                        Y = -ball._vector.Y
+                    };
+                }
+
+                MoveBall(ball);
+                hitWall = false;
+            }
+
+
+        }
+
         //metoda odpowiedzialna za poruszanie piłkami każdą w osobnym wątku
         public override void RunBalls()
         {
             foreach (Ball ball in _currentBalls)
             {
-                Task task = new Task(() =>
+                Task task = Task.Run(() =>
                 {
-                    bool hitWall = false;
-                    FindNewBallPosition(ball);
-                    while (true)
-                    {
-
-                        if (!hitWall && (ball.XCoordinate <= 0 || ball.XCoordinate >= 640 - ball.Diameter))
-                        {
-                            hitWall = true;
-                            ball._vector = new PointF
-                            {
-                                X = -ball._vector.X,
-                                Y = ball._vector.Y
-                            };
-                        }
-
-                        if (!hitWall && (ball.YCoordinate <= 0 || ball.YCoordinate >= 360 - ball.Diameter))
-                        {
-                            hitWall = true;
-                            ball._vector = new PointF
-                            {
-                                X = ball._vector.X,
-                                Y = -ball._vector.Y
-                            };
-                        }
-
-                        MoveBall(ball);
-                        hitWall = false;
-                    }
+                    BallTaskMethod(ball, cancellationTokenSource.Token);
                 });
-                task.Start();
+               
             }
-            Task task1 = new Task(() => IsCollisionAndHandleCollision(_currentBalls));
+            Task task1 = new Task(() => IsCollisionAndHandleCollision(_currentBalls, cancellationTokenSource.Token));
             task1.Start();
+        }
+
+        public override void StopBalls()
+        {
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource = new CancellationTokenSource();
         }
     }
 }

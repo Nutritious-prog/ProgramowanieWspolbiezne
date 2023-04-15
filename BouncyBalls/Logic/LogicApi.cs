@@ -12,10 +12,11 @@ namespace Logic
         }
         public abstract ObservableCollection<Ball> getBalls();
         public abstract void CreateBalls(int NrOfBalls);
-        public abstract void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls);
+        public abstract void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken token);
         public abstract void MoveBall(Ball ball);
         public abstract void BounceBall(Ball ball1, Ball ball2);
         public abstract void FindNewBallPosition(Ball ball);
         public abstract void RunBalls();
+        public abstract void StopBalls();
     }
 }
