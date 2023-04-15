@@ -10,6 +10,9 @@
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
+    <Window.Resources>
+        <local:RandomColorConverter x:Key="RandomColorConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
@@ -70,7 +73,7 @@
                     </ItemsControl.ItemContainerStyle>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Ellipse Fill="#823665" Width="{Binding Diameter}" Height="{Binding Diameter}"/>
+                            <Ellipse Fill="{Binding Path=Diameter, Converter={StaticResource RandomColorConverter}}"  Width="{Binding Diameter}" Height="{Binding Diameter}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemsPanel>
