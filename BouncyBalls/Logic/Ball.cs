@@ -1,15 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace Data
+namespace Logic
 {
     public class Ball : INotifyPropertyChanged
     {
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -26,7 +25,7 @@ namespace Data
             set
             {
                 _xCoordinate = value;
-                RaisePropertyChanged("XCoordinate");
+                RaisePropertyChanged(nameof(XCoordinate));
             }
         }
         public double YCoordinate
@@ -38,13 +37,12 @@ namespace Data
             set
             {
                 _yCoordinate = value;
-                RaisePropertyChanged("YCoordinate");
+                RaisePropertyChanged(nameof(YCoordinate));
             }
         }
 
         //ilość pikseli którą kulka będzie przebywać w każdym odświeżeniu
         public double NrOfFrames { get; set; }
-        public double Speed { get; set; }
 
         public int Diameter { get; private set; }
         public int Radius => Diameter / 2;
@@ -60,6 +58,10 @@ namespace Data
                 {
                     _destinationPlaneX = 640 - Diameter;
                 }
+                else if (value < 0 + Diameter)
+                {
+                    _destinationPlaneX = 0 + Diameter;
+                }
                 else _destinationPlaneX = value;
             }
         }
@@ -73,6 +75,10 @@ namespace Data
                 if (value > 360 - Diameter)
                 {
                     _destinationPlaneY = 360 - Diameter;
+                }
+                else if (value < 0 + Diameter)
+                {
+                    _destinationPlaneY = 0 + Diameter;
                 }
                 else _destinationPlaneY = value;
             }
@@ -111,7 +117,7 @@ namespace Data
             else
                 YCoordinate += _vector.Y;
         }
-        public void UpdateMovement(double x, double y, PointF vector, double speed)
+        public void UpdateMovement(double x, double y, PointF vector)
         {
             _canMove = false;
 
@@ -120,8 +126,7 @@ namespace Data
             {
                 DestinationPlaneX = x;
                 DestinationPlaneY = y;
-                _vector = vector;
-                Speed = speed;
+                _vector = vector;         
             }
             _canMove = true;    
         }

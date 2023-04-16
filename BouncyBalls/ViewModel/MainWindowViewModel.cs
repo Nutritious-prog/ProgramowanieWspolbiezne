@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Logic;
-using Data;
+using Model;
 
 namespace ViewModel
 {
@@ -16,18 +11,24 @@ namespace ViewModel
     {
 
 
-        private LogicAPI _logicAPI;
+        private ModelAbstractApi _modelAPI;
+
+        private bool first = true;
 
         public ICommand Apply { get; set; }
         public ICommand Start { get; set; }
-        public ObservableCollection<Ball> ObsCollBall => _logicAPI.getBalls();
+        public ObservableCollection<Ball> ObsCollBall => _modelAPI.GetBalls();
 
         public MainWindowViewModel()
         {
 
-            _logicAPI = LogicAPI.CreateAPI();
-            Apply = new RelayCommand(() => _logicAPI.CreateBalls(NrOfBalls));
-            Start = new RelayCommand(() => _logicAPI.RunBalls());
+            _modelAPI = ModelAbstractApi.CreateApi();
+            Apply = new RelayCommand(() =>
+            {            
+                _modelAPI.ApplyNumberOfBalls(NrOfBalls, first);
+                first = false;
+            });
+            Start = new RelayCommand(() => _modelAPI.StartGame());
         }
 
 
@@ -46,7 +47,7 @@ namespace ViewModel
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged([CallerMemberName] string property = "")
         {
@@ -61,7 +62,7 @@ namespace ViewModel
         protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
 
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            throw new NotImplementedException(); 
         }
     }
 }

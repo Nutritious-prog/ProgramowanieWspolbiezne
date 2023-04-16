@@ -4,9 +4,9 @@ using System.Collections.ObjectModel;
 
 namespace Logic
 {
-    public abstract class LogicAPI
+    public abstract class LogicAbstractApi
     {
-        public static LogicAPI CreateAPI()
+        public static LogicAbstractApi CreateAPI()
         {
             return new BallManager();
         }
@@ -15,7 +15,7 @@ namespace Logic
         public abstract void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken token);
         public abstract void MoveBall(Ball ball);
         public abstract void BounceBall(Ball ball1, Ball ball2);
-        public abstract void FindNewBallPosition(Ball ball);
+        public abstract void FindInitBallDestination(Ball ball);
         public abstract void RunBalls();
         public abstract void StopBalls();
     }

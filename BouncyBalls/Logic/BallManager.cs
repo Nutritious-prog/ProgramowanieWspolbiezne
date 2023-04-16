@@ -1,12 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
-using Data;
 
 
 namespace Logic
 {
-    public class BallManager : LogicAPI
+    internal class BallManager : LogicAbstractApi
     {
         private ObservableCollection<Ball> _currentBalls = new ObservableCollection<Ball>();
         public ObservableCollection<Ball> CurrentBalls
@@ -22,8 +21,7 @@ namespace Logic
         }
         public override void CreateBalls(int NrOfBalls)
         {
-            _currentBalls.Clear();
-            StopBalls();
+
             Random random = new Random();
             for (int i = 0; i < NrOfBalls; i++)
             {
@@ -60,8 +58,8 @@ namespace Logic
 
             double temp2 = ball2.NrOfFrames + ((2 * ball1._mass) / (ball1._mass + ball2._mass));
 
-            ball1.UpdateMovement(ball2.DestinationPlaneX, ball2.DestinationPlaneY, ball2._vector, temp);
-            ball2.UpdateMovement(tmpX, tmpY, tmp, temp2);
+            ball1.UpdateMovement(ball2.DestinationPlaneX, ball2.DestinationPlaneY, ball2._vector);
+            ball2.UpdateMovement(tmpX, tmpY, tmp);
         }
 
         public override /*async*/ void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken cancellationToken) // czy pilka zderza sie z inna pilka
@@ -70,7 +68,7 @@ namespace Logic
             double distanceY;
 
             Dictionary<(int, int), bool> bouncesDict = new Dictionary<(int, int), bool>();
-            // na poczatku nie mamy zadnych zarejestrowanych odbic - wrzucamy wszedzie false, zeby nam potem nie krzyczal, że Key does not exist
+            // na poczatku nie mamy zadnych zarejestrowanych odbic - wrzucamy wszedzie false
             for (int i = 0; i < CurrentBalls.Count; i++)
             {
                 for (int j = i + 1; j < CurrentBalls.Count; j++)
@@ -79,7 +77,7 @@ namespace Logic
                 }
             }
 
-            while (true && !cancellationToken.IsCancellationRequested) // wykrywamy zderzenia przez caly czas dzialania programu, aż do odwołania
+            while (!cancellationToken.IsCancellationRequested) // wykrywamy zderzenia przez caly czas dzialania programu, aż do odwołania
             {
                 for (int i = 0; i < CurrentBalls.Count; i++)
                 {
@@ -112,7 +110,7 @@ namespace Logic
             
         }
 
-        public override void FindNewBallPosition(Ball ball)
+        public override void FindInitBallDestination(Ball ball)
         {
             // losowe miejsce na ktorejs ze scianek jako destination point
 
@@ -197,8 +195,8 @@ namespace Logic
         {
 
             bool hitWall = false;
-            FindNewBallPosition(ball);
-            while (true && !cancellationToken.IsCancellationRequested)
+            FindInitBallDestination(ball);
+            while (!cancellationToken.IsCancellationRequested)
             {
 
                 if (!hitWall && (ball.XCoordinate <= 0 || ball.XCoordinate >= 640 - ball.Diameter))
@@ -244,6 +242,12 @@ namespace Logic
         }
 
         public override void StopBalls()
+        {
+            _currentBalls.Clear();
+            CancelCurrentThreads();
+        }
+
+        internal void CancelCurrentThreads()
         {
             cancellationTokenSource.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
