@@ -1,6 +1,6 @@
 namespace DataTests
 {
-    public class Tests
+    public class DataTests
     {
         [SetUp]
         public void Setup()
@@ -8,7 +8,7 @@ namespace DataTests
         }
 
         [Test]
-        public void Test1()
+        public void DataTest()
         {
             Assert.Pass();
         }

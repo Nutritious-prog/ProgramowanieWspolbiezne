@@ -24,14 +24,7 @@ namespace View
         {
             InitializeComponent();
         }
-        private void applyButton_Click(object sender, RoutedEventArgs e)
-        {
 
-        }
 
-        private void startButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
