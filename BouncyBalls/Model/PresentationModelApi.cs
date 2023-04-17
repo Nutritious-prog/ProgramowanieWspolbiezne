@@ -1,4 +1,5 @@
-﻿using Logic;
+﻿using Data;
+using Logic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

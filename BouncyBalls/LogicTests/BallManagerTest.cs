@@ -1,4 +1,5 @@
 ﻿using Logic;
+using Data;
 using System.Collections.ObjectModel;
 
 namespace LogicTests

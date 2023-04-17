@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Runtime.CompilerServices;
 
-namespace Logic
+namespace Data
 {
     public class Ball : INotifyPropertyChanged
     {
