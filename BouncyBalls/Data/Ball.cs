@@ -117,7 +117,7 @@ namespace Data
             else
                 YCoordinate += _vector.Y;
         }
-        public void UpdateMovement(double x, double y, PointF vector)
+        public void UpdateMovement(double x, double y, PointF vector, double nrOfFrames)
         {
             _canMove = false;
 
@@ -126,7 +126,8 @@ namespace Data
             {
                 DestinationPlaneX = x;
                 DestinationPlaneY = y;
-                _vector = vector;         
+                _vector = vector;
+                NrOfFrames = nrOfFrames;
             }
             _canMove = true;    
         }

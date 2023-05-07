@@ -27,14 +27,14 @@ namespace Logic
             for (int i = 0; i < NrOfBalls; i++)
             {
                 PointF vector = new PointF(0, 0);
-                int diameter = random.Next(40) + 20;
+                int diameter = random.Next(60) + 20;
                 Ball ball = new Ball(
                     random.Next(0, 640 - diameter),
                     random.Next(2, 360 - diameter),
                     random.Next(120, 144), diameter,
                     0,
                     0,
-                    random.NextDouble() + 0.1,
+                    diameter * diameter,
                     vector);        
                 _currentBalls.Add(ball);    
             }
@@ -59,8 +59,8 @@ namespace Logic
 
             double temp2 = ball2.NrOfFrames + ((2 * ball1._mass) / (ball1._mass + ball2._mass));
 
-            ball1.UpdateMovement(ball2.DestinationPlaneX, ball2.DestinationPlaneY, ball2._vector);
-            ball2.UpdateMovement(tmpX, tmpY, tmp);
+            ball1.UpdateMovement(ball2.DestinationPlaneX, ball2.DestinationPlaneY, ball2._vector, temp);
+            ball2.UpdateMovement(tmpX, tmpY, tmp, temp2);
         }
 
         public override /*async*/ void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken cancellationToken) // czy pilka zderza sie z inna pilka
