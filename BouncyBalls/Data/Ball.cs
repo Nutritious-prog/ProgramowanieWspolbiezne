@@ -10,10 +10,11 @@ namespace Data
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         private object _lockObject = new object();
         private bool _canMove = true;
+        private bool _canBounce = true;
         private double _xCoordinate;
         private double _yCoordinate;
         public double XCoordinate
@@ -39,6 +40,12 @@ namespace Data
                 _yCoordinate = value;
                 RaisePropertyChanged(nameof(YCoordinate));
             }
+        }
+
+        public bool CanBounce
+        {
+            get { return _canBounce; }
+            set { _canBounce = value; }
         }
 
         //ilość pikseli którą kulka będzie przebywać w każdym odświeżeniu

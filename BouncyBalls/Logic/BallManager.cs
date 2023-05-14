@@ -9,6 +9,9 @@ namespace Logic
     internal class BallManager : LogicAbstractApi
     {
         private ObservableCollection<Ball> _currentBalls = new ObservableCollection<Ball>();
+        Dictionary<(Ball, Ball), DateTime> bouncesDict = new Dictionary<(Ball, Ball), DateTime>();
+        private object dictLock = new object();
+        private const double MIN_COLLISION_INTERVAL = 3;
         public ObservableCollection<Ball> CurrentBalls
         {
             get
@@ -24,10 +27,11 @@ namespace Logic
         {
 
             Random random = new Random();
-            for (int i = 0; i < NrOfBalls; i++)
+            bool collision = false;
+            while( _currentBalls.Count != NrOfBalls )
             {
                 PointF vector = new PointF(0, 0);
-                int diameter = random.Next(60) + 20;
+                int diameter = random.Next(30) + 35;
                 Ball ball = new Ball(
                     random.Next(0, 640 - diameter),
                     random.Next(2, 360 - diameter),
@@ -35,9 +39,31 @@ namespace Logic
                     0,
                     0,
                     diameter * diameter,
-                    vector);        
-                _currentBalls.Add(ball);    
+                    vector);
+                foreach (Ball different_ball in CurrentBalls)
+                {
+                    if (ball.isCollision(different_ball))
+                    {
+                        collision = true;
+                        break;
+                    }
+                    
+                }
+                if (!collision) _currentBalls.Add(ball);
+                else collision = false;
+
             }
+            
+
+                
+            
+
+        }
+
+        private async void enableBallBouncing(Ball ball)
+        {
+            await Task.Delay(3);
+            ball.CanBounce = true;
 
         }
 
@@ -63,52 +89,29 @@ namespace Logic
             ball2.UpdateMovement(tmpX, tmpY, tmp, temp2);
         }
 
-        public override /*async*/ void IsCollisionAndHandleCollision(ObservableCollection<Ball> CurrentBalls, CancellationToken cancellationToken) // czy pilka zderza sie z inna pilka
+        public override /*async*/ void HandleCollision(Ball ball1, Ball ball2) // czy pilka zderza sie z inna pilka
         {
-            double distanceX;
-            double distanceY;
-
-            Dictionary<(int, int), bool> bouncesDict = new Dictionary<(int, int), bool>();
-            // na poczatku nie mamy zadnych zarejestrowanych odbic - wrzucamy wszedzie false
-            for (int i = 0; i < CurrentBalls.Count; i++)
+            lock (dictLock)
             {
-                for (int j = i + 1; j < CurrentBalls.Count; j++)
+                if (!bouncesDict.ContainsKey((ball1, ball2)))
                 {
-                    bouncesDict[(i, j)] = false;
+                    Ball temp = ball1;
+                    ball1 = ball2;
+                    ball2 = temp;
                 }
+                DateTime lastCollisionTime = bouncesDict[(ball1, ball2)];
+                TimeSpan timeSinceLastCollision = DateTime.Now - lastCollisionTime;
+                if (timeSinceLastCollision.TotalMilliseconds < MIN_COLLISION_INTERVAL)
+                {
+                    // Do not handle collision yet
+                    return;
+                }
+                BounceBall(ball1, ball2);
+                bouncesDict[(ball1, ball2)] = DateTime.Now;
+
+                //enableBallsDictBouncing(ball1, ball2);
             }
 
-            while (!cancellationToken.IsCancellationRequested) // wykrywamy zderzenia przez caly czas dzialania programu, aż do odwołania
-            {
-                for (int i = 0; i < CurrentBalls.Count; i++)
-                {
-                    for (int j = i + 1; j < CurrentBalls.Count; j++)
-                    {
-                        //distanceX = CurrentBalls[i].XCoordinate - CurrentBalls[j].XCoordinate;
-                        //distanceY = CurrentBalls[i].YCoordinate - CurrentBalls[j].YCoordinate;
-                        if (CurrentBalls[i].isCollision(CurrentBalls[j]))        
-                        {
-                            // jezeli obsluzylismy juz odbicie dla tej pary kulek, to pomijamy Bounce
-                            if (bouncesDict[(i, j)]) continue;
-
-                            Debug.WriteLine($"COLLISION DETECTED between ball:{i} and {j}");
-                            BounceBall(CurrentBalls[i], CurrentBalls[j]);
-                            bouncesDict[(i, j)] = true; // jezeli zrobilismy Bounce, to ustawiamy flage na true, zeby wiedziec, ze to odbicie juz zostalo obsluzone
-                        }
-                        else bouncesDict[(i, j)] = false; // jezeli kulki sie nie stykaja to ustawiamy flage na false, zeby bylo mozna obsluzyc kolejne zderzenie dla tej pary kulek
-                      
-                    }
-                }
-                int index = 0;
-                foreach (bool value in bouncesDict.Values)
-                {
-                    if(value == true) Debug.WriteLine($"Dictionary value[{index}]: " + value);
-
-                    index++;
-                }
-                Thread.Sleep(5); // krótkie odczekanie, aby jednorazowo wykrywać moment zderzenia
-            }
-            
         }
 
         public override void FindInitBallDestination(Ball ball)
@@ -200,6 +203,35 @@ namespace Logic
             while (!cancellationToken.IsCancellationRequested)
             {
 
+                foreach (Ball diffrent_ball in _currentBalls)
+                {
+                    if (diffrent_ball == ball)
+                    {
+                        continue;
+                    }
+
+
+                    double distanceX = ball.XCoordinate - diffrent_ball.XCoordinate;
+                    double distanceY = ball.YCoordinate - diffrent_ball.YCoordinate;
+                    if (ball.CanBounce && diffrent_ball.CanBounce && Math.Sqrt(distanceX * distanceX + distanceY * distanceY) <= ball.Radius + diffrent_ball.Radius)
+                    {
+                        HandleCollision(ball, diffrent_ball);
+                        ball.CanBounce = false;
+                        diffrent_ball.CanBounce = false;
+                        enableBallBouncing(ball);
+                        enableBallBouncing(diffrent_ball);
+
+
+
+
+                    }
+
+
+
+                }
+
+
+
                 if (!hitWall && (ball.XCoordinate <= 0 || ball.XCoordinate >= 640 - ball.Diameter))
                 {
                     hitWall = true;
@@ -219,9 +251,10 @@ namespace Logic
                         Y = -ball._vector.Y
                     };
                 }
-
                 MoveBall(ball);
                 hitWall = false;
+
+
             }
 
 
@@ -230,21 +263,28 @@ namespace Logic
         //metoda odpowiedzialna za poruszanie piłkami każdą w osobnym wątku
         public override void RunBalls()
         {
+            for (int i = 0; i < CurrentBalls.Count; i++)
+            {
+                for (int j = i + 1; j < CurrentBalls.Count; j++)
+                {
+                    bouncesDict[(CurrentBalls[i], CurrentBalls[j])] = DateTime.Now;
+                }
+            }
+
             foreach (Ball ball in _currentBalls)
             {
                 Task task = Task.Run(() =>
                 {
                     BallTaskMethod(ball, cancellationTokenSource.Token);
                 });
-               
+
             }
-            Task task1 = new Task(() => IsCollisionAndHandleCollision(_currentBalls, cancellationTokenSource.Token));
-            task1.Start();
         }
 
         public override void StopBalls()
         {
             _currentBalls.Clear();
+            bouncesDict.Clear();
             CancelCurrentThreads();
         }
 
