@@ -1,11 +1,7 @@
-﻿using Logic;
-using Data;
-using System.Numerics;
-using System;
+﻿using Data;
 using System.Drawing;
-using System.Diagnostics;
 
-namespace LogicTests
+namespace DataTests
 {
     internal class BallTests
     {
@@ -79,13 +75,14 @@ namespace LogicTests
 
             int newDestinationPlaneX = 200;
             int newDestinationPlaneY = 300;
+            int nrOfFrames = 50;
             PointF newVector = new PointF(10, -5);
 
-            testBall.UpdateMovement(newDestinationPlaneX, newDestinationPlaneY, newVector);
+            testBall.UpdateMovement(newDestinationPlaneX, newDestinationPlaneY, newVector, nrOfFrames);
             Assert.That(newDestinationPlaneX, Is.EqualTo(testBall.DestinationPlaneX));
             Assert.That(newDestinationPlaneY, Is.EqualTo(testBall.DestinationPlaneY));
             Assert.That(newVector, Is.EqualTo(testBall._vector));
-
+            Assert.That(nrOfFrames, Is.EqualTo(testBall.NrOfFrames));
         }
 
     }
