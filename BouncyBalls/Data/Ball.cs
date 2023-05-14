@@ -131,5 +131,9 @@ namespace Data
             }
             _canMove = true;    
         }
+        public bool isCollision(Ball ball2)
+        {
+            return Math.Sqrt(Math.Pow(this.XCoordinate - ball2.XCoordinate, 2) + Math.Pow(this.YCoordinate - ball2.YCoordinate, 2)) <= this.Radius + ball2.Radius;
+        }
     }
 }

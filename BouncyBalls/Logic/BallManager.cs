@@ -84,9 +84,9 @@ namespace Logic
                 {
                     for (int j = i + 1; j < CurrentBalls.Count; j++)
                     {
-                        distanceX = CurrentBalls[i].XCoordinate - CurrentBalls[j].XCoordinate;
-                        distanceY = CurrentBalls[i].YCoordinate - CurrentBalls[j].YCoordinate;
-                        if (Math.Sqrt(distanceX * distanceX + distanceY * distanceY) <= CurrentBalls[i].Radius + CurrentBalls[j].Radius)        
+                        //distanceX = CurrentBalls[i].XCoordinate - CurrentBalls[j].XCoordinate;
+                        //distanceY = CurrentBalls[i].YCoordinate - CurrentBalls[j].YCoordinate;
+                        if (CurrentBalls[i].isCollision(CurrentBalls[j]))        
                         {
                             // jezeli obsluzylismy juz odbicie dla tej pary kulek, to pomijamy Bounce
                             if (bouncesDict[(i, j)]) continue;
