@@ -29,7 +29,7 @@ namespace Logic
 
 
             Random random = new Random();
-            Logger logger = new Logger();
+            LoggerApi logger = LoggerApi.CreateLogger();
             bool collision = false;
             int i = 0;
             while (_currentBalls.Count != NrOfBalls)

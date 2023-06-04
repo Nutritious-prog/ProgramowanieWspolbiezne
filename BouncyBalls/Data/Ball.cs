@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Data
 {
-    public class Ball : INotifyPropertyChanged
+    public class Ball : BallApi, INotifyPropertyChanged
     {
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -95,10 +95,10 @@ namespace Data
         public double _mass { get; set; }
         public PointF _vector { get; set; }
 
-        private Logger _logger;
+        private LoggerApi _logger;
 
         
-        public Ball(int id, double XCoordinate, double YCoordinate, double NrOfFrames, int Diameter, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector, Logger logger)
+        public Ball(int id, double XCoordinate, double YCoordinate, double NrOfFrames, int Diameter, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector, LoggerApi logger)
         {
             this.Diameter = Diameter;
             this.XCoordinate = XCoordinate;
@@ -112,7 +112,7 @@ namespace Data
             this.Id = id;
         }
 
-        public void Move()
+        public override void Move()
         {
             if (!_canMove) return;
 
@@ -131,7 +131,7 @@ namespace Data
                 YCoordinate += _vector.Y;
             _logger.SaveLogsToFile(this);
         }
-        public void UpdateMovement(double x, double y, PointF vector, double nrOfFrames)
+        public override void UpdateMovement(double x, double y, PointF vector, double nrOfFrames)
         {
             _canMove = false;
 
@@ -146,7 +146,7 @@ namespace Data
             _canMove = true;
             //_logger.SaveLogsToFile(this);
         }
-        public bool isCollision(Ball ball2)
+        public override bool isCollision(Ball ball2)
         {
             return Math.Sqrt(Math.Pow(this.XCoordinate - ball2.XCoordinate, 2) + Math.Pow(this.YCoordinate - ball2.YCoordinate, 2)) <= this.Radius + ball2.Radius;
         }

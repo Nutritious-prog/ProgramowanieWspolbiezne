@@ -2,11 +2,11 @@
 
 namespace Data
 {
-    public class Logger
+    public class Logger : LoggerApi
     {
         private object _lock = new object();
 
-        public void SaveLogsToFile(Ball ball)
+        public override void SaveLogsToFile(Ball ball)
         {
             var jsonOptions = new JsonSerializerOptions
             {
