@@ -15,6 +15,7 @@ namespace Data
         private object _lockObject = new object();
         private bool _canMove = true;
         private bool _canBounce = true;
+        public int Id { get; init; }
         private double _xCoordinate;
         private double _yCoordinate;
         public double XCoordinate
@@ -94,7 +95,10 @@ namespace Data
         public double _mass { get; set; }
         public PointF _vector { get; set; }
 
-        public Ball(double XCoordinate, double YCoordinate, double NrOfFrames, int Diameter, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector)
+        private Logger _logger;
+
+        
+        public Ball(int id, double XCoordinate, double YCoordinate, double NrOfFrames, int Diameter, double DestinationPlaneX, double DestinationPlaneY, double Mass, PointF Vector, Logger logger)
         {
             this.Diameter = Diameter;
             this.XCoordinate = XCoordinate;
@@ -104,6 +108,8 @@ namespace Data
             this.DestinationPlaneY = DestinationPlaneY;
             this._mass = Mass;
             this._vector = Vector;
+            _logger = logger;
+            this.Id = id;
         }
 
         public void Move()
@@ -123,6 +129,7 @@ namespace Data
                 YCoordinate = 0;
             else
                 YCoordinate += _vector.Y;
+            _logger.SaveLogsToFile(this);
         }
         public void UpdateMovement(double x, double y, PointF vector, double nrOfFrames)
         {
@@ -136,7 +143,8 @@ namespace Data
                 _vector = vector;
                 NrOfFrames = nrOfFrames;
             }
-            _canMove = true;    
+            _canMove = true;
+            //_logger.SaveLogsToFile(this);
         }
         public bool isCollision(Ball ball2)
         {

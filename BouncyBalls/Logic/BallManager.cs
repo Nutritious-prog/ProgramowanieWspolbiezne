@@ -25,21 +25,27 @@ namespace Logic
         }
         public override void CreateBalls(int NrOfBalls)
         {
+            if (File.Exists(@"C:\Users\talla\Desktop\Studia\Rok_2\Semestr_4\wspolbiezne\Wspolbiezne_new\BouncyBalls\Data\logs.json")) File.Delete(@"C:\Users\talla\Desktop\Studia\Rok_2\Semestr_4\wspolbiezne\Wspolbiezne_new\BouncyBalls\Data\logs.json");
+
 
             Random random = new Random();
+            Logger logger = new Logger();
             bool collision = false;
-            while( _currentBalls.Count != NrOfBalls )
+            int i = 0;
+            while (_currentBalls.Count != NrOfBalls)
             {
                 PointF vector = new PointF(0, 0);
                 int diameter = random.Next(30) + 35;
                 Ball ball = new Ball(
+                    i,
                     random.Next(0, 640 - diameter),
                     random.Next(2, 360 - diameter),
                     random.Next(120, 144), diameter,
                     0,
                     0,
                     diameter * diameter,
-                    vector);
+                    vector,
+                    logger);
                 foreach (Ball different_ball in CurrentBalls)
                 {
                     if (ball.isCollision(different_ball))
@@ -47,17 +53,13 @@ namespace Logic
                         collision = true;
                         break;
                     }
-                    
+
                 }
                 if (!collision) _currentBalls.Add(ball);
                 else collision = false;
+                i++;
 
             }
-            
-
-                
-            
-
         }
 
         private async void enableBallBouncing(Ball ball)
