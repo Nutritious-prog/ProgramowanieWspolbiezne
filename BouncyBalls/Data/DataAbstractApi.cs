@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ namespace Data
 
     public abstract class LoggerApi
     {
-        public abstract void SaveLogsToFile(Ball ball);
+        public abstract void SaveLogsToFile(ObservableCollection<Ball> balls);
 
         public static LoggerApi CreateLogger()
         {

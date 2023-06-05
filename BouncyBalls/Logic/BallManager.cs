@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Timers;
 using Data;
 
 
@@ -12,6 +13,7 @@ namespace Logic
         Dictionary<(Ball, Ball), DateTime> bouncesDict = new Dictionary<(Ball, Ball), DateTime>();
         private object dictLock = new object();
         private const double MIN_COLLISION_INTERVAL = 3;
+        LoggerApi logger = LoggerApi.CreateLogger();
         public ObservableCollection<Ball> CurrentBalls
         {
             get
@@ -29,7 +31,7 @@ namespace Logic
 
 
             Random random = new Random();
-            LoggerApi logger = LoggerApi.CreateLogger();
+           
             bool collision = false;
             int i = 0;
             while (_currentBalls.Count != NrOfBalls)
@@ -197,6 +199,7 @@ namespace Logic
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
+
         public void BallTaskMethod(Ball ball, CancellationToken cancellationToken)
         {
 
@@ -281,6 +284,22 @@ namespace Logic
                 });
 
             }
+
+            Task loggerTask = Task.Run(() =>
+            {
+
+                System.Timers.Timer timer = new System.Timers.Timer();
+                timer.Elapsed += new ElapsedEventHandler(OnTimerRun);
+                timer.Interval = 1000;
+                timer.Enabled = true;
+
+            });
+        }
+
+        public void OnTimerRun(object sender, EventArgs e)
+        {
+            logger.SaveLogsToFile(_currentBalls);
+            
         }
 
         public override void StopBalls()

@@ -129,7 +129,7 @@ namespace Data
                 YCoordinate = 0;
             else
                 YCoordinate += _vector.Y;
-            _logger.SaveLogsToFile(this);
+            //_logger.SaveLogsToFile(this);
         }
         public override void UpdateMovement(double x, double y, PointF vector, double nrOfFrames)
         {

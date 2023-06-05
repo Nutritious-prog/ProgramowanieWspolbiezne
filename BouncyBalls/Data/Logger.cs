@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace Data
 {
@@ -6,7 +7,7 @@ namespace Data
     {
         private object _lock = new object();
 
-        public override void SaveLogsToFile(Ball ball)
+        public override void SaveLogsToFile(ObservableCollection<Ball> balls)
         {
             var jsonOptions = new JsonSerializerOptions
             {
@@ -16,7 +17,7 @@ namespace Data
             var objectToSerialize = new
             {
                 Timestamp = DateTime.Now,
-                Ball = ball
+                Balls = balls
             };
 
             string json = JsonSerializer.Serialize(objectToSerialize, jsonOptions);
